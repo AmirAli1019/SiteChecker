@@ -14,9 +14,13 @@ class Program
     const int MAX_CONCURRENT_THREADS = 5;
     static SemaphoreSlim semaphore = new SemaphoreSlim(MAX_CONCURRENT_THREADS);
 
+    static List<string> availableSites = new();
+
     static void ShowResults()
     {
         AnsiConsole.Write(table);
+
+        Console.WriteLine("\n" + string.Join(',', availableSites));
     }
 
     static async Task TestWebsite(string site)
@@ -52,6 +56,9 @@ class Program
                     p.ExitCode == 0 ? OK : FAILED,
                     response.IsSuccessStatusCode ? OK : FAILED
                 );
+
+                if (response.IsSuccessStatusCode)
+                    availableSites.Add(site);
             }
         }
         finally
