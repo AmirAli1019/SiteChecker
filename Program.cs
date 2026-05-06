@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Spectre.Console;
 
@@ -6,7 +7,6 @@ class Program
 {
     static Table table = new();
 
-    const string OK = "[green]OK[/]";
     const string FAILED = "[red]FAILED[/]";
 
     static HttpClient client = new();
@@ -23,12 +23,28 @@ class Program
         Console.WriteLine("\n" + string.Join(',', availableSites));
     }
 
+    static string GetHTTPSuccessOutput(int statusCode) => $"[green]{statusCode}[/]";
+
+    static string GetHTTPFailOutput(int statusCode) => $"[red]{statusCode}[/]";
+
+    static string ExtractPingAverage(StreamReader pingStdout)
+    {
+        string output = pingStdout.ReadToEnd();
+
+        string average = Regex
+            .Match(output, @"rtt min/avg/max/mdev = [\d\.]+/([\d\.]+)/[\d\.]+/[\d\.]+ ms")
+            .Groups[1]
+            .Value;
+
+        return $"[green]{average}[/]";
+    }
+
     static async Task TestWebsite(string site)
     {
         try
         {
             Console.WriteLine($"Pinging {site} ...");
-            Process p = Process.Start(
+            Process pingProcess = Process.Start(
                 new ProcessStartInfo
                 {
                     FileName = "ping",
@@ -38,9 +54,9 @@ class Program
                     UseShellExecute = false,
                 }
             )!;
-            p.WaitForExit();
+            pingProcess.WaitForExit();
 
-            HttpResponseMessage response = new(System.Net.HttpStatusCode.Unauthorized);
+            HttpResponseMessage response = new();
 
             try
             {
@@ -53,8 +69,12 @@ class Program
             {
                 table.AddRow(
                     $"[blue]{site}[/]",
-                    p.ExitCode == 0 ? OK : FAILED,
-                    response.IsSuccessStatusCode ? OK : FAILED
+                    pingProcess.ExitCode == 0
+                        ? ExtractPingAverage(pingProcess.StandardOutput)
+                        : FAILED,
+                    response.IsSuccessStatusCode
+                        ? GetHTTPSuccessOutput(((int)response.StatusCode))
+                        : GetHTTPFailOutput(((int)response.StatusCode))
                 );
 
                 if (response.IsSuccessStatusCode)
