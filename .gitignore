@@ -2,3 +2,4 @@ bin
 obj
 *.txt
 !sites.txt
+!chinese-websites.txt
