@@ -2,16 +2,6 @@
 
 A fast, concurrent command-line utility to test domain reachability using both ICMP (ping) and HTTP protocols. SiteChecker helps you quickly verify which websites are accessible and responsive from your network.
 
-## Features
-
-- **Dual Protocol Testing**: Tests domains using both ICMP (ping) and HTTPS protocols
-- **Concurrent Requests**: Configurable concurrent testing for fast batch processing
-- **Real-time Feedback**: Live progress updates as each domain is tested
-- **Flexible Timeouts**: Customize ping and HTTP request timeouts independently
-- **Graceful Interruption**: Press Ctrl+C to stop and display partial results
-- **Color-coded Output**: Clear visual feedback with green (success) and red (failed) results
-- **AOT Compiled**: Single executable file with no runtime dependencies required
-
 ## Requirements
 
 - **.NET 10.0** or later
@@ -63,22 +53,26 @@ SiteChecker <file-path> [options]
 
 ### Examples
 
-#### Basic usage with default settings (5 concurrent tests):
+#### Basic usage with default settings (5 concurrent tests)
+
 ```bash
 SiteChecker sites.txt
 ```
 
-#### Test with 10 concurrent requests:
+#### Test with 10 concurrent requests
+
 ```bash
 SiteChecker sites.txt --max-concurrent 10
 ```
 
-#### Short form with custom timeouts:
+#### Short form with custom timeouts
+
 ```bash
 SiteChecker sites.txt -m 20 -p 5000 -t 30
 ```
 
-#### Test with aggressive settings (good for fast networks):
+#### Test with aggressive settings (good for fast networks)
+
 ```bash
 SiteChecker sites.txt --max-concurrent 50 --ping-timeout 1000 --http-timeout 10
 ```
@@ -95,6 +89,7 @@ stackoverflow.com
 ```
 
 Example files are included in the repository:
+
 - `sites.txt` - General websites
 - `chinese-websites.txt` - Chinese websites
 
@@ -109,6 +104,7 @@ The program displays results in a formatted table showing:
 After all tests complete, available websites (those with successful HTTP responses) are listed separately.
 
 Example output:
+
 ```
 ┌─────────────────┬────────────┬──────────────┐
 │ Website         │ ICMP (ms)  │ HTTP Status  │
