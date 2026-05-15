@@ -1,5 +1,6 @@
 bin
 obj
+nuget.config
 *.txt
 !sites.txt
 !chinese-websites.txt
