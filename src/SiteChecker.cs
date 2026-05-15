@@ -39,10 +39,20 @@ partial class SiteChecker(string[] commandLineArgs)
         _semaphore = new(_config.maxConcurrentTests);
         _httpClient = new() { Timeout = TimeSpan.FromSeconds(_config.httpTimeout) };
 
-        string[] sites = (await File.ReadAllTextAsync(_config.fileName)).Split(
-            new[] { '\n', '\r' },
-            StringSplitOptions.RemoveEmptyEntries
-        );
+        string[] sites = null!;
+        try
+        {
+            sites = (await File.ReadAllTextAsync(_config.fileName)).Split(
+                new[] { '\n', '\r' },
+                StringSplitOptions.RemoveEmptyEntries
+            );
+        }
+        catch (Exception exp)
+        {
+            Console.WriteLine(exp.Message);
+
+            Environment.Exit(1);
+        }
 
         _table.AddColumns("Website", "ICMP (ms)", "HTTP Status");
 

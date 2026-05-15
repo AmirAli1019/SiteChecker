@@ -21,11 +21,6 @@ static class CliOptions
         DefaultValueFactory = parseResult => 15,
         Description = "Timeout for every HTTP request in seconds",
     };
-
-    public static Option<bool> versionOption = new("--version")
-    {
-        Description = "Show version information",
-    };
 }
 
 partial class SiteChecker
@@ -40,22 +35,16 @@ partial class SiteChecker
             CliOptions.httpTimeoutOption,
             CliOptions.maxConcurrentTestsOption,
             CliOptions.pingTimeoutOption,
-            CliOptions.versionOption,
         };
 
         var parseResult = rootCommand.Parse(args);
         parseResult.Invoke();
 
-        if (parseResult.GetValue(CliOptions.versionOption))
-        {
-            string version = typeof(Program).Assembly.GetName().Version!.ToString(3);
-            Console.WriteLine($"SiteChecker v{version}");
-        }
-
         if (
             parseResult.Errors.Count > 0
             || args.Contains("--help")
             || args.Contains("-help")
+            || args.Contains("--version")
             || args.Contains("-h")
             || args.Contains("-?")
         )
