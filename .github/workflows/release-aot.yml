@@ -1,0 +1,100 @@
+name: Publish Native AOT Release
+
+on:
+  push:
+    branches:
+      - release
+
+permissions:
+  contents: write
+
+jobs:
+  publish-aot:
+    name: Publish AOT for ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: win-x64
+            runner: windows-latest
+            artifact_name: SiteChecker-windows-x64.exe
+          - os: linux-x64
+            runner: ubuntu-latest
+            artifact_name: SiteChecker-linux-x64
+          - os: osx-x64
+            runner: macos-latest
+            artifact_name: SiteChecker-macos-x64
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Linux Dependencies
+        if: matrix.runner == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zlib1g-dev
+
+      - name: Dotnet Publish
+        run: >
+          dotnet publish -c Release 
+          -r ${{ matrix.os }}
+          -o ./publish
+
+      - name: Rename Binary for Release
+        shell: bash
+        run: |
+          if [ "${{ matrix.runner }}" = "windows-latest" ]; then
+            mv ./publish/*.exe ./publish/${{ matrix.artifact_name }}
+          else
+            # Find the main executable (excluding any .dbg or .pdb files if generated)
+            find ./publish -type f ! -name "*.dbg" ! -name "*.pdb" -exec mv {} ./publish/${{ matrix.artifact_name }} \;
+          fi
+
+      - name: Upload Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-binary
+          path: ./publish/${{ matrix.artifact_name }}
+          retention-days: 1
+
+  create-release:
+    name: Create GitHub Release
+    needs: publish-aot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract Version from Project File
+        id: get_version
+        run: |
+          VERSION=$(grep -oP '(?<=<Version>)[^<]+' *.csproj)
+          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Extracted Version: $VERSION"
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./all-artifacts
+
+      - name: Prepare Release Files
+        run: |
+          mkdir ./release-files
+          find ./all-artifacts -type f -exec cp {} ./release-files/ \;
+          ls -R ./release-files
+
+      - name: Create and Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.PROJECT_VERSION }}
+          name: Release v${{ env.PROJECT_VERSION }}
+          draft: false
+          prerelease: false
+          files: ./release-files/*
