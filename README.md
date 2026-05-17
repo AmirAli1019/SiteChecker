@@ -89,29 +89,9 @@ Example files are included in the repository:
 - `sites.txt` - General websites
 - `chinese-websites.txt` - Chinese websites
 
-## Output Format
+## Sample Output
 
-The program displays results in a formatted table showing:
-
-- **Website**: The domain being tested
-- **ICMP (ms)**: Response time in milliseconds (green = success, red = failed)
-- **HTTP Status**: HTTP status code (green = success, red = error/timeout)
-
-After all tests complete, available websites (those with successful HTTP responses) are listed separately.
-
-Example output:
-
-```
-┌─────────────────┬────────────┬──────────────┐
-│ Website         │ ICMP (ms)  │ HTTP Status  │
-├─────────────────┼────────────┼──────────────┤
-│ example.com     │ 45         │ 200          │
-│ google.com      │ 23         │ 200          │
-│ failed-site.com │ FAILED     │ ERR          │
-└─────────────────┴────────────┴──────────────┘
-
-Available: example.com, google.com
-```
+![screenshot](./assets/sample-output.png)
 
 ## Performance Tips
 
