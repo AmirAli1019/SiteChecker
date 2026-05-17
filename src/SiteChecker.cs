@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Net.NetworkInformation;
+using System.Text;
 using Spectre.Console;
 
 record SiteCheckerConfig(string fileName, int maxConcurrentTests, int pingTimeout, int httpTimeout);
@@ -42,16 +43,17 @@ partial class SiteChecker(string[] commandLineArgs)
         string[] sites = null!;
         try
         {
-            sites = (await File.ReadAllTextAsync(_config.fileName)).Split(
-                new[] { '\n', '\r' },
-                StringSplitOptions.RemoveEmptyEntries
-            );
+            sites = (
+                await File.ReadAllTextAsync(_config.fileName, new UTF8Encoding(false, true))
+            ).Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+        catch (DecoderFallbackException)
+        {
+            ShowErrorAndExit("The input file cannot be a binary file.");
         }
         catch (Exception exp)
         {
-            Console.WriteLine(exp.Message);
-
-            Environment.Exit(1);
+            ShowErrorAndExit(exp.Message);
         }
 
         _table.AddColumns("Website", "ICMP (ms)", "HTTP Status");
@@ -108,5 +110,11 @@ partial class SiteChecker(string[] commandLineArgs)
     {
         AnsiConsole.Write(_table);
         Console.WriteLine("\nAvailable: " + string.Join(", ", _availableSites));
+    }
+
+    static void ShowErrorAndExit(string message)
+    {
+        Console.WriteLine(message);
+        Environment.Exit(1);
     }
 }
