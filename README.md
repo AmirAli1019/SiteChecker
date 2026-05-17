@@ -1,10 +1,6 @@
 # SiteChecker
 
-A fast, concurrent command-line utility to test domain reachability using both ICMP (ping) and HTTP protocols. SiteChecker helps you quickly verify which websites are accessible and responsive from your network.
-
-## Requirements
-
-- **.NET 10.0** or later
+A fast, concurrent command-line utility to test domain reachability using both ICMP (ping) and HTTP protocols. SiteChecker helps you quickly verify which websites are accessible and responsive from your network. Useful while **Internet Blackout in Iran**.
 
 ## Installation
 
