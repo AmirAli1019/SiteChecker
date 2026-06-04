@@ -75,19 +75,20 @@ SiteChecker sites.txt --max-concurrent 50 --ping-timeout 1000 --http-timeout 10
 
 ## Input File Format
 
-Create a text file with one domain per line (without `https://` or `http://`):
+Create a text file with one URL per line:
 
 ```
-example.com
-google.com
-github.com
-stackoverflow.com
+http://example.com
+https://google.com
+https://github.com
+https://stackoverflow.com
 ```
 
 Example files are included in the repository:
 
 - `sites.txt` - General websites
 - `chinese-websites.txt` - Chinese websites
+- `mirrors.txt` - Software repository mirrors
 
 ## Sample Output
 
