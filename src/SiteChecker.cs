@@ -67,13 +67,16 @@ partial class SiteChecker(string[] commandLineArgs)
     async Task TestWebsite(string site)
     {
         await _semaphore.WaitAsync();
+
+        Uri siteUri = new(site);
+
         try
         {
             string pingResult = "[red]FAILED[/]";
             try
             {
                 using var pinger = new Ping();
-                var reply = await pinger.SendPingAsync(site, _config.pingTimeout);
+                var reply = await pinger.SendPingAsync(siteUri.Host, _config.pingTimeout);
                 if (reply.Status == IPStatus.Success)
                     pingResult = $"[green]{reply.RoundtripTime}[/]";
             }
@@ -83,7 +86,7 @@ partial class SiteChecker(string[] commandLineArgs)
             bool isSuccess = true;
             try
             {
-                var response = await _httpClient.GetAsync($"https://{site}");
+                var response = await _httpClient.GetAsync(siteUri.ToString());
                 httpResult = $"[green]{((int)response.StatusCode)}[/]";
             }
             catch
